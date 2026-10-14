@@ -1,79 +1,218 @@
-# Discord Control MCP
+<div align="center">
 
-Local stdio MCP server for administering Discord through an **official bot account**. TypeScript, Node.js and the Discord API. It exposes tools for guild settings, channels, roles, messages, moderation, events, assets, interactions, webhooks and voice playback.
+# DiscordMCP
 
-This is an MCP integration. The always-on community bot is a separate project: [Discord Community Bot](https://github.com/JeamDev/discord-community-bot).
+### Ваш сервер. Ваш бот. Управление обычными словами.
 
-## Install
+**Русский** · [English](README.en.md)
 
-Requires Node.js 22.12 or newer. FFmpeg and Opus dependencies are installed by npm on supported platforms.
+<img src="docs/discord-mcp.webp" width="700" alt="Концептуальная иллюстрация: мост между ИИ-помощником и Discord" />
+
+[![Node.js](https://img.shields.io/badge/Node.js-22.12%2B-43853d?logo=node.js&logoColor=white)](https://nodejs.org/)
+[![MCP](https://img.shields.io/badge/MCP-stdio-839dff)](https://modelcontextprotocol.io/)
+[![Discord](https://img.shields.io/badge/Discord-your%20own%20bot-5865f2?logo=discord&logoColor=white)](https://discord.com/developers/applications)
+
+Подключите созданного вами Discord-бота к ChatGPT Desktop, Codex или другому MCP-клиенту — и управляйте сервером через ассистента.
+
+</div>
+
+## Как это работает
+
+**DiscordMCP — мост между ИИ-ассистентом и официальным Discord API.** Вы создаёте своего бота, приглашаете его на сервер и сохраняете токен локально. Мост предоставляет ассистенту инструменты для действий от имени этого бота.
+
+```mermaid
+flowchart LR
+    A[Вы] -->|Обычная речь| B[ChatGPT Desktop / MCP-клиент]
+    B <-->|MCP · stdio| C[DiscordMCP]
+    C <-->|Bot API| D[Ваш Discord-бот]
+    D <-->|Выданные права| E[Ваш сервер]
+```
+
+У бота не должно быть заранее написанных команд или собственной логики: достаточно Discord application и Bot Token. Для REST-действий Gateway не нужен; для голоса и событий соединение открывается по необходимости. ИИ работает в вашем MCP-клиенте. Отдельный ключ OpenAI для DiscordMCP не требуется.
+
+## Что можно попросить
+
+> «Оформи сервер в космическом стиле: предложи категории, названия каналов, цвета ролей, приветствие и правила. Сначала покажи план.»
+
+> «Посмотри текущие каналы и роли. Предложи аккуратное оформление без удаления старого контента и изменения прав доступа.»
+
+> «Создай канал объявлений и красиво оформи правила через embed. Используй welcome.png из папки assets.»
+
+| Область | Возможности |
+| --- | --- |
+| Оформление | Название, иконка, баннер, роли, цвета, эмодзи, стикеры, welcome screen, onboarding |
+| Структура | Категории, текстовые и голосовые каналы, права, форумы, ветки |
+| Сообщения | Чтение, поиск, embeds, компоненты, вложения, ответы, закрепления |
+| Управление | Участники, роли, timeout, kick/ban, AutoMod, аудит |
+| Сообщество | События, опросы, вебхуки, application commands |
+| Голос | Подключение, локальное аудио, очередь, пауза, soundboard |
+
+Возможности ограничены правами бота, положением ролей, intents и правилами Discord. Например, баннер доступен только при поддержке со стороны самого сервера.
+
+## 1. Создайте своего бота
+
+1. Откройте [Discord Developer Portal](https://discord.com/developers/applications) → **New Application**.
+2. На странице **Bot** создайте бота, если он ещё не создан, и получите **Bot Token**. Нужен токен бота, не Client Secret и не токен личного аккаунта.
+3. Включите **Message Content Intent**, если хотите читать сообщения, и **Server Members Intent**, если нужны списки участников. Эти настройки также включаются в `.env`.
+4. Через раздел установки / OAuth2 пригласите бота на свой сервер со scope `bot`; для application commands добавьте `applications.commands`.
+5. Выдайте права под задачу. Для оформления обычно нужны управление сервером, каналами, ролями и выражениями, отправка сообщений и embeds. Права модерации и вебхуков выдаются отдельно.
+6. Поставьте роль бота выше ролей, которыми он должен управлять. Владельцем сервера и равными или более высокими ролями бот управлять не сможет.
+7. В Discord включите **Настройки → Расширенные → Режим разработчика** и скопируйте ID сервера.
+
+## 2. Установите мост
+
+Требуются **Node.js 22.12+**, npm и Git.
 
 ```sh
+git clone https://github.com/JeamDev/DiscordMCP.git
+cd DiscordMCP
 npm ci
-npm run check
+npm run build
+```
+
+**На Windows** можно запустить мастер:
+
+```powershell
+npm run setup
+```
+
+Он запросит токен скрытым вводом, проверит его через Discord, сохранит `.env` и предложит регистрацию MCP через установленный Codex CLI. Встроенная ссылка приглашения запрашивает Administrator для полного управления: проверьте права и уменьшите их, если вашей задаче это не нужно. Уже приглашённого бота повторно приглашать не требуется.
+
+**На любой ОС** доступна ручная настройка. Скопируйте `.env.example` в `.env`:
+
+```powershell
+# Windows PowerShell
+Copy-Item .env.example .env
+```
+
+```sh
+# macOS / Linux
 cp .env.example .env
 ```
 
-On Windows use `Copy-Item .env.example .env`, or run `npm run setup` for hidden token input and optional local MCP registration. The setup utility uses an installed Codex CLI; another MCP client can be configured manually.
+Откройте `.env` локальным редактором и замените заглушки:
 
-Create an application in the [Discord Developer Portal](https://discord.com/developers/applications). Set `DISCORD_BOT_TOKEN` in the ignored `.env` file. Never use a personal account token. Invite the bot with the permissions needed for your tasks, place its role appropriately, and set `DISCORD_GUILD_ID` and `DISCORD_ALLOWED_GUILD_IDS`. An empty allowlist allows all servers accessible to this bot.
+```dotenv
+DISCORD_BOT_TOKEN=YOUR_BOT_TOKEN
+DISCORD_GUILD_ID=YOUR_SERVER_ID
+DISCORD_ALLOWED_GUILD_IDS=YOUR_SERVER_ID
+DISCORD_MESSAGE_CONTENT=true
+DISCORD_GUILD_MEMBERS=true
+```
 
-Use least privilege. The optional Windows setup helper currently generates an Administrator invite for full server administration; review that permission and reduce the requested permissions before accepting it when full administration is unnecessary. Enable Message Content and Server Members intents only when needed, both in `.env` and the Developer Portal. Voice connects on demand.
+Токен не нужно отправлять ассистенту в чат или указывать в конфигурации MCP-клиента: приложение читает `.env` из своей папки. Этот файл исключён из Git. Если intents не нужны или не включены в Developer Portal, оставьте соответствующие значения `false`.
 
-## Connect any MCP client
+## 3. Подключите ChatGPT Desktop / Codex
+
+Откройте **Settings → MCP servers → Add server**, выберите **STDIO**:
+
+| Поле | Значение |
+| --- | --- |
+| Name | `discord-control` |
+| Command | `node` или полный путь к `node.exe` |
+| Arguments | Один аргумент: полный путь к `DiscordMCP/dist/index.js` |
+
+Сохраните и нажмите **Restart**. Мастер Windows может выполнить регистрацию автоматически; отдельно она доступна через `npm run register`.
+
+Либо используйте CLI:
+
+```sh
+codex mcp add discord-control -- node /absolute/path/DiscordMCP/dist/index.js
+```
+
+Путь должен быть абсолютным; пути с пробелами заключайте в кавычки. Поддерживаемые локальные клиенты одного Codex-host используют общую MCP-конфигурацию. [Официальная инструкция OpenAI](https://learn.chatgpt.com/docs/extend/mcp).
+
+**ChatGPT в браузере:** этот проект предоставляет локальный `stdio`, не публичный HTTP endpoint. Веб-версия не читает локальный `config.toml`; облачному чату нужны доступные ему plugin/remote MCP tools. Инструкция выше относится к локальному desktop-host. [Область поддержки](https://learn.chatgpt.com/docs/extend/mcp).
+
+<details>
+<summary>Другой MCP-клиент с JSON-конфигурацией</summary>
 
 ```json
 {
   "mcpServers": {
     "discord-control": {
       "command": "node",
-      "args": ["/absolute/path/discord-control-mcp/dist/index.js"]
+      "args": ["/absolute/path/DiscordMCP/dist/index.js"]
     }
   }
 }
 ```
 
-Keep credentials out of this JSON; `.env` is loaded relative to the project directory. Stdout carries protocol messages only. Without a token, the server still starts and provides help and local diagnostics.
+Формат зависит от клиента. В Windows JSON-путях используйте `/` или экранированные `\\`.
+
+</details>
+
+## 4. Начните работу
 
 ```sh
-npm run build
 npm run doctor
 ```
 
-## Tools and safety boundaries
+Попросите ассистента: **«Проверь подключение DiscordMCP и покажи доступные серверы. Пока ничего не меняй.»** Затем опишите задачу обычными словами.
 
-Call `discord_help` or read the `discord://catalog` resource for operation schemas. Grouped tools take `action`, `params`, `query`, `body`, optional `files` and `reason`. Keep snowflake IDs and permission bitfields as strings.
+Для справки доступны `discord_status`, `discord_help` и ресурс `discord://catalog`. Без токена MCP тоже запускается для диагностики; операции Discord вернут ошибку настройки.
+
+<details>
+<summary>Прямой вызов инструментов</summary>
+
+Получить схему через `discord_help`:
 
 ```json
-{"group":"channels","action":"list"}
+{"group":"channels","action":"create"}
 ```
 
-Channel listing through `discord_channels`:
+Вызвать `discord_channels`:
 
 ```json
-{"action":"list","params":{"guild_id":"123456789012345678"}}
+{
+  "action": "create",
+  "params": {"guild_id": "123456789012345678"},
+  "body": {"name": "welcome", "type": 0, "topic": "Start here"},
+  "reason": "Approved server design"
+}
 ```
 
-The guild allowlist covers guild routes, channels, invites and webhooks; global account/application edits are blocked when an allowlist is configured. Attachments are restricted to `DISCORD_ASSET_DIR`, including symlink resolution. Mentions are disabled by default unless explicitly requested. Runtime errors and results redact known tokens and webhook credentials.
+Все snowflake ID и битовые права передаются строками. Упоминания отключены по умолчанию. Файлы берутся из `assets/`; выход за пределы папки, в том числе через symlink, блокируется.
 
-The integration can perform destructive administrative operations when the bot has permission. MCP exposure is not an approval system: configure your client's confirmations and review actions before applying them to a live server. Discord message content is untrusted input.
+</details>
 
-## Environment
+## Настройки
 
-| Variable | Purpose |
+| Переменная | Назначение |
 | --- | --- |
-| `DISCORD_BOT_TOKEN` | Official bot token, local only |
-| `DISCORD_GUILD_ID` | Optional default guild |
-| `DISCORD_ALLOWED_GUILD_IDS` | Comma-separated guild allowlist |
-| `DISCORD_ASSET_DIR` | Local upload/audio directory, default `./assets` |
-| `DISCORD_MESSAGE_CONTENT` | Optional privileged intent |
-| `DISCORD_GUILD_MEMBERS` | Optional privileged intent |
-| `DISCORD_EVENT_BUFFER_SIZE` | Bounded in-memory event buffer, 10–2000 |
+| `DISCORD_BOT_TOKEN` | Токен созданного вами бота |
+| `DISCORD_GUILD_ID` | Сервер по умолчанию |
+| `DISCORD_ALLOWED_GUILD_IDS` | Разрешённые серверы через запятую; пусто — все доступные боту |
+| `DISCORD_ASSET_DIR` | Папка изображений, вложений и аудио; по умолчанию `./assets` |
+| `DISCORD_MESSAGE_CONTENT` | Содержимое сообщений, по умолчанию `false` |
+| `DISCORD_GUILD_MEMBERS` | Intent участников, по умолчанию `false` |
+| `DISCORD_EVENT_BUFFER_SIZE` | Буфер событий: 10–2000, по умолчанию 200 |
 
-Process environment overrides `.env`. Restart the MCP server after changing settings. `npm run demo:sound` generates a short local synthetic test sound; it does not contact Discord.
+Окружение процесса имеет приоритет над `.env`. После изменений перезапустите MCP. При заданном allowlist глобальные изменения профиля и приложения блокируются, чтобы не затронуть другие серверы.
 
-## Development
+## Если что-то не работает
 
-`npm run check` compiles TypeScript and runs offline tests for real MCP client negotiation, operation schemas, guild boundaries, file containment, redaction and voice processing. Tests must not use real tokens or a live Discord server.
+| Симптом | Что проверить |
+| --- | --- |
+| `401` | Правильный Bot Token и перезапуск MCP после изменения |
+| `403` | Права бота и канала, положение ролей, intents |
+| Сервер не найден | ID сервера, приглашение бота, allowlist |
+| Сообщения не читаются | Message Content Intent в Developer Portal и `.env` |
+| Нет инструментов в чате | Абсолютный путь к сборке, доступность Node.js, Restart MCP |
+| `429` | Дождитесь снятия rate limit; не повторяйте успешные изменения |
 
-The public repository contains clean source and synthetic fixtures only. It excludes runtime state, credentials, logs, original community assets and deployment scripts. See [SECURITY.md](SECURITY.md), [CONTRIBUTING.md](CONTRIBUTING.md) and [LICENSE](LICENSE).
+## Границы и безопасность
+
+Используются только официальные bot accounts. Токены личных аккаунтов и self-bot не поддерживаются. Мост проверяет серверный allowlist, ограничивает файлы и скрывает токены в результатах. Подтверждения опасных действий настраиваются в MCP-клиенте; сам мост не является отдельной системой согласования.
+
+Запрошенные сообщения и сведения о сервере возвращаются вашему ИИ-клиенту. Выдавайте боту доступ только к нужным каналам. Не публикуйте `.env`, токены и приватную переписку. [Безопасность](SECURITY.md).
+
+## Разработка
+
+```sh
+npm run check
+```
+
+TypeScript и 22 офлайн-теста: MCP handshake, `stdio`, каталог операций, изоляция серверов, файлы, скрытие секретов и аудио. Токен не требуется; живой Discord не изменяется.
+
+Стек: TypeScript · MCP SDK · Discord.js · Zod · FFmpeg. Условия использования исходников: [LICENSE](LICENSE). Обложка — концептуальная иллюстрация, не интерфейс продукта.
