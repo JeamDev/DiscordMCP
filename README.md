@@ -10,6 +10,7 @@
 
 [![Node.js](https://img.shields.io/badge/Node.js-22.12%2B-43853d?logo=node.js&logoColor=white)](https://nodejs.org/)
 [![MCP](https://img.shields.io/badge/MCP-stdio-839dff)](https://modelcontextprotocol.io/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-77c9b0)](LICENSE)
 [![Discord](https://img.shields.io/badge/Discord-your%20own%20bot-5865f2?logo=discord&logoColor=white)](https://discord.com/developers/applications)
 
 Подключите созданного вами Discord-бота к ChatGPT Desktop, Codex или другому MCP-клиенту — и управляйте сервером через ассистента.
@@ -215,4 +216,10 @@ npm run check
 
 TypeScript и 22 офлайн-теста: MCP handshake, `stdio`, каталог операций, изоляция серверов, файлы, скрытие секретов и аудио. Токен не требуется; живой Discord не изменяется.
 
-Стек: TypeScript · MCP SDK · Discord.js · Zod · FFmpeg. Условия использования исходников: [LICENSE](LICENSE). Обложка — концептуальная иллюстрация, не интерфейс продукта.
+Стек: TypeScript · MCP SDK · Discord.js · Zod · FFmpeg.
+
+## Лицензия
+
+[MIT](LICENSE) — код можно свободно использовать, изменять и распространять, в том числе в коммерческих проектах, с сохранением уведомления об авторских правах и текста лицензии. Зависимости сохраняют собственные лицензии.
+
+Обложка — концептуальная иллюстрация, не интерфейс продукта.

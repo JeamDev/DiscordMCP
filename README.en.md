@@ -10,6 +10,7 @@
 
 [![Node.js](https://img.shields.io/badge/Node.js-22.12%2B-43853d?logo=node.js&logoColor=white)](https://nodejs.org/)
 [![MCP](https://img.shields.io/badge/MCP-stdio-839dff)](https://modelcontextprotocol.io/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-77c9b0)](LICENSE)
 [![Discord](https://img.shields.io/badge/Discord-your%20own%20bot-5865f2?logo=discord&logoColor=white)](https://discord.com/developers/applications)
 
 Connect a Discord bot you create to ChatGPT Desktop, Codex, or another MCP client, then manage your server through your assistant.
@@ -215,4 +216,10 @@ npm run check
 
 TypeScript plus 22 offline tests covering MCP negotiation, `stdio`, operation schemas, guild boundaries, files, secret redaction and audio. Tests require no token and do not modify a live Discord server.
 
-Built with TypeScript · MCP SDK · Discord.js · Zod · FFmpeg. Source reuse terms: [LICENSE](LICENSE). The cover is a concept illustration, not a product interface.
+Built with TypeScript · MCP SDK · Discord.js · Zod · FFmpeg.
+
+## License
+
+[MIT](LICENSE) — free to use, modify and distribute, including in commercial projects, while retaining the copyright and license notice. Third-party dependencies retain their own licenses.
+
+The cover is a concept illustration, not a product interface.

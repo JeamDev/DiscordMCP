@@ -2,6 +2,7 @@
   "name": "discord-control-mcp",
   "version": "1.0.0",
   "private": true,
+  "license": "MIT",
   "description": "Local stdio MCP server for Discord administration through an official bot.",
   "type": "module",
   "engines": {
